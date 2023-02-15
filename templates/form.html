@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Age of Empires 2 Helper!</title>
+    <style>
+      body {
+        background-color: #c0c0c0;
+      }
+      #chat-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px auto;
+        max-width: 80%;
+        padding: 20px;
+        background-color: white;
+        border-radius: 5px;
+        width: 100%;
+      }
+      #chat-history {
+        height: 400px;
+        overflow-y: scroll;
+      }
+      .chat-message {
+        background-color: #333;
+        color: rgb(225, 170, 170);
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px;
+      }
+      .chat-message-user {
+        background-color: #ddd;
+        color: black;
+        opacity: 0.8;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px;
+        align-self: flex-end;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chat-container">
+      <div id="chat-history"></div>
+      <form id="prompt-form">
+        <label for="prompt">Question:</label><br>
+        <textarea id="prompt" name="prompt" rows="2" style="resize:both; width: 800px; "></textarea><br>
+        <button type="submit" style="display: none;"></button>
+      </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('#prompt-form').on('submit', function(event) {
+          event.preventDefault();
+          var formData = $(this).serialize();
+          $.ajax({
+            type: 'POST',
+            url: '/generate_npc',
+            data: formData,
+            dataType: 'json',
+            success: function(data) {
+              var userMessage = '<p class="chat-message-user">' + $('#prompt').val() + '</p>';
+              var npcMessage = '<p class="chat-message">' + data.npc_text + '</p>';
+              $('#chat-history').append(userMessage);
+              $('#chat-history').append(npcMessage);
+              $('#prompt').val('');
+            },
+            error: function(xhr, status, error) {
+              $('#chat-history').append('<p>An error occurred. Please try again.</p>');
+            }
+          });
+        });
+        $('#prompt').keydown(function(event) {
+          if (event.keyCode == 13 && !event.shiftKey) {
+            event.preventDefault();
+            $('#prompt-form').submit();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
